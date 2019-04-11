@@ -1,1 +1,1 @@
-# jira-hooks
+# git-jira-hooks
