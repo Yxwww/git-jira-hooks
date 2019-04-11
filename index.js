@@ -5,6 +5,7 @@ const { promisify } = require('util');
 const { readFile: fsReadFile } = require('fs');
 const exec = promisify(childProcessExec);
 const readFile = promisify(fsReadFile)
+consle.log();
 
 async function execStdout(cmd) {
   const { stderr, stdout } = await exec(cmd);
