@@ -38,8 +38,7 @@ async function fillCommitMessageWithJiraIssueId(issueRegex){
   }
   const [ issueNumber ] = issueNumberMatchedStrs;
   const message = (await readFile(commitMessagePath, 'utf8')).trim();
-  console.log(issueNumber, message,);
-  await writeFile(commitMessagePath, ` ${issueNumber}\n${message}`, 'utf8')
+  await writeFile(commitMessagePath, `${issueNumber}\n${message}`, 'utf8')
 }
 
 fillCommitMessageWithJiraIssueId(/(CLD-[^/]*)/g);
