@@ -6,14 +6,14 @@ const { readFile: fsReadFile } = require('fs');
 const exec = promisify(childProcessExec);
 const readFile = promisify(fsReadFile)
 
-const issueRegex = /(CLD-[^/]*)/i;
+const issueRegex = /(CLD-[^/]*)/g;
 
 async function execStdout(cmd) {
   const { stderr, stdout } = await exec(cmd);
   if(stderr){
     throw new Error(stderr);
   }
-  return stdout.trim;
+  return stdout.trim();
 }
 
 async function getCurrentBranch() {
@@ -27,8 +27,8 @@ async function getCurrentIssueNumberFromBranchName() {
 
 async function checkCommitMessage(){
   const message = (await readFile(process.argv[2], 'utf8')).trim();
-  await getCurrentIssueNumberFromBranchName();
-  console.log(message);
+  const [ currentIssueNumber ] = await getCurrentIssueNumberFromBranchName();
+  console.log('currentIssue: ', currentIssueNumber);
 }
 
 checkCommitMessage();
