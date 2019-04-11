@@ -2,33 +2,44 @@
 
 const { exec: childProcessExec } = require('child_process');
 const { promisify } = require('util');
-const { readFile: fsReadFile } = require('fs');
+const { readFile: fsReadFile, writeFile: fsWritefile } = require('fs');
+const { exit } = require('process');
+
 const exec = promisify(childProcessExec);
-const readFile = promisify(fsReadFile)
-consle.log();
+const readFile = promisify(fsReadFile);
+const writeFile = promisify(fsWritefile);
+
+function complete() {
+  exit(0);
+}
 
 async function execStdout(cmd) {
   const { stderr, stdout } = await exec(cmd);
   if(stderr){
     throw new Error(stderr);
   }
-  return stdout.trim;
+  return stdout.trim();
 }
 
 async function getCurrentBranch() {
   return await execStdout('git symbolic-ref --short HEAD');
 }
 
-async function getCurrentIssueNumberFromBranchName() {
-  const currentBranch = await getCurrentBranch();
-  return currentBranch;
+async function getCurrentIssueNumberFromBranchName(issueRegex) {
+  return (await getCurrentBranch()).match(issueRegex);
 }
 
-async function checkCommitMessage(){
-  const message = (await readFile(process.argv[2], 'utf8')).trim();
-  await getCurrentIssueNumberFromBranchName();
-  console.log(message);
+async function fillCommitMessageWithJiraIssueId(issueRegex){
+  const [,,commitMessagePath] = process.argv;
+  const issueNumberMatchedStrs = await getCurrentIssueNumberFromBranchName(issueRegex);
+  if (!issueNumberMatchedStrs) {
+    complete();
+    return;
+  }
+  const [ issueNumber ] = issueNumberMatchedStrs;
+  const message = (await readFile(commitMessagePath, 'utf8')).trim();
+  console.log(issueNumber, message,);
+  await writeFile(commitMessagePath, ` ${issueNumber}\n${message}`, 'utf8')
 }
 
-checkCommitMessage();
-
+fillCommitMessageWithJiraIssueId(/(CLD-[^/]*)/g);
